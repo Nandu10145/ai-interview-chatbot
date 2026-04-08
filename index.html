@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interview Chatbot 💖</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f6fa;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            margin: 30px auto;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            padding: 15px;
+            background: #ff6b81;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+
+        .user {
+            background: #ffccd5;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot {
+            background: #dfe6e9;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            background: #ff6b81;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <div class="header">Interview Chatbot 🤖</div>
+
+    <div class="chat-box" id="chatBox"></div>
+
+    <div class="input-box">
+        <input type="text" id="input" placeholder="Type topic or answer..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function addMessage(text, type) {
+        const chatBox = document.getElementById("chatBox");
+
+        const msg = document.createElement("div");
+        msg.classList.add("message", type);
+        msg.innerText = text;
+
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // async function sendMessage() {
+    //     const input = document.getElementById("input");
+    //     const text = input.value;
+
+    //     if (!text) return;
+
+    //     addMessage(text, "user");
+
+    //     // First try as topic
+    //     let res = await fetch("http://127.0.0.1:8000/get-question", {
+    //         method: "POST",
+    //         headers: {"Content-Type": "application/json"},
+    //         body: JSON.stringify({topic: text})
+    //     });
+
+    //     let data = await res.json();
+
+    //     if (data.questions) {
+    //         addMessage("Questions:\n" + data.questions.join("\n"), "bot");
+    //     } else {
+    //         // If not topic → treat as answer
+    //         res = await fetch("http://127.0.0.1:8000/evaluate", {
+    //             method: "POST",
+    //             headers: {"Content-Type": "application/json"},
+    //             body: JSON.stringify({answer: text})
+    //         });
+
+    //         data = await res.json();
+    //         addMessage(data.feedback, "bot");
+    //     }
+
+    //     input.value = "";
+    // }
+    async function sendMessage() {
+    const input = document.getElementById("input");
+    const text = input.value;
+
+    if (!text) return;
+
+    addMessage(text, "user");
+
+    try {
+        let res = await fetch("http://127.0.0.1:8000/get-question", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({topic: text})
+        });
+
+        let data = await res.json();
+        console.log(data);
+
+        if (data.questions) {
+            addMessage(data.questions.join("\n"), "bot");
+        } else {
+            res = await fetch("http://127.0.0.1:8000/evaluate", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({answer: text})
+            });
+
+            data = await res.json();
+            console.log(data);
+
+            addMessage(data.feedback, "bot");
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        addMessage("Error connecting to server 😢", "bot");
+    }
+
+    input.value = "";
+}
+</script>
+
+</body>
+</html>

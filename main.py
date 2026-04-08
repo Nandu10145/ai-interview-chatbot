@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -50,3 +51,12 @@ def evaluate(data: UserInput):
         return {"feedback": "try explaining in more detail"}
 
     return {"feedback": "good answer, try adding examples for improvement"}
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
